@@ -1,6 +1,6 @@
 /*    This is the main file of the entire program. */
 
-/******************* INCLUDED HEADER FILES AND LIBRARIES *******************/ 
+/************************ HEADER FILES AND LIBRARIES ************************/ 
 #include "notePeriod.h"
 #include "noteScore.h"
 #include "customChar.h"
@@ -10,7 +10,7 @@
 
 
 
-/************************** DEFINED PIN NUMBERS ***************************/
+/******************************* PIN NUMBERS ********************************/
 #define BuzzB 2 // buzzer to display the bass part
 #define BuzzV1 3 // buzzer to display the violin1 part (main melody)
 #define BuzzV2 11 // buzzer to display the violin2 part (counter-melody)
@@ -26,57 +26,69 @@ int d5 = 7;
 int d6 = 8;
 int d7 = 9;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
-// When indicating a coordinate in the comment, the first element represents
-// columns, the second element represents rows on LCD1602.
+// When indicating a coordinate on lcd in the comment, the first element 
+// represents columns, the second element represents rows on LCD1602.
 // (col, row)
-// There are 2 rows and 16 columns.
+// There are 2 rows and 16 columns on a lcd screen.
 
 
 /**************************** GLOBAL VARIABLES ***************************/
 
-/*    Create a long const variable to set the tempo of the whole song,
+/*    Create a long const variable to set the tempo for the entire song,
  * it represents the length of a beat(a quarter note) in microsecond.
+ 
  *    When the tempo is 115bpm(beats per minute), each beat would be 
  * 521739 microseconds long.
- *    Since each beat will be divided into 16 parts to generate different 
- * note length, (BEATLENGTH % 16 = 0) must be true. 521744 is the closest 
- * number to 521739 which satisfies this condition.
+ * (60,000,000 microseconds / 115 beats) = 521739 microseconds per beat.
+ 
+ *    Since each beat will be sub divided into 16 parts to generate different 
+ * note length, and all variables are represented by integers. Therefore,
+ * (BEATLENGTH % 16 = 0) must be true. 521744 is the closest number to 521739
+ * which satisfies this condition.
  */
   const unsigned long BEATLENGTH = 521744; // tempo 115
 
 /*    Since the music score is made up of arrays, we need an index for 
- * each buzzer to run through the arrays.
+ * each array to run through the entire music score.
  */
-  unsigned int V1index = 0; // index for main melody
-  unsigned int V2index = 0; // index for counter melody
-  unsigned int Bindex = 0; // index for bass
+  unsigned int V1index = 0; // index for main melody(V1)
+  unsigned int V2index = 0; // index for counter melody(V2)
+  unsigned int Bindex = 0; // index for bass(B)
 
 /*    In order for a buzzer to play in the right tone, we need to turn the
  * buzzer on and off for a constant period of time. Check "notePeriod.h" 
- * for details on how to define and use the note periods.
+ * for details on how to define and use the note period values.
  */
-  // create an int variable to store the delay time until the next switch 
-  // motion is required
+  // create an int variable to store the delay time for the next switch
+  // motion on any buzzer,
+  // delayTime = 10 represents the next switch mostion will take place
+  // after 10 microseconds.
   unsigned int delayTime = 0; 
-  // create a long variable to keep track of the current length of the beat
+  // create a long variable to keep track of the current length of the beat,
+  // curLength = 0 represents the very beginning of a beat.
   unsigned long curLength = 0;
-  // create three long variables to store the next time for switching the buzzers
-  // on or off
+  // create three long variables to store the next time for each buzzer to 
+  // be switched on or off.
   // for convinence, NST = next switch time
+  // V1nextSwitchTime = 2000 means when curLength = 2000, switch V1 buzzer.
   unsigned long V1nextSwitchTime = 0; // NST for V1
   unsigned long V2nextSwitchTime = 0; // NST for V2
   unsigned long BnextSwitchTime = 0; // NST for B
-  // create three byte variables to store the current state of each buzzer
+  // create three byte variables to store the current state of each buzzer,
+  // V1state = LOW means the V1 buzzer is off, HIGH means on.
   byte V1state = LOW; // buzzer state for V1
   byte V2state = LOW; // buzzer state for V2
   byte Bstate = LOW; // buzzer state for B
   // create three long variables to store the note length for the current note
-  // on each buzzer
-  // for convinence, NL = note length
+  // on each buzzer,
+  // for convinence, NL = note length,
+  // V1noteLength = 5000 means the current note will play for 5000 microseconds
+  // on V1 buzzer.
   unsigned long V1noteLength = 0; // NL for the current V1 note
   unsigned long V2noteLength = 0; // NL for the current V2 note
   unsigned long BnoteLength = 0; // NL for the current B note
-  // create and initialize max and min variables for NST and NL
+  // create and initialize max and min variables for NST and NL, they are used to
+  // determine which buzzer will be switched first(minNST) or last(maxNST).
   unsigned long minNextSwitchTime = 0; // min for NST
   unsigned long maxNextSwitchTime = 0; // max for NST
   unsigned long minNoteLength = 0; // min for NL
