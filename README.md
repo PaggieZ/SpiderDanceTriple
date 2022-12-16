@@ -1,6 +1,6 @@
 # SpiderDanceTriple
 
-Demostration Video: https://youtu.be/DY0F4xzbqNs
+Demonstration Video: https://youtu.be/DY0F4xzbqNs
 
 NST = next switch time
 
@@ -10,6 +10,6 @@ V1 = violin 1 = main melody
 
 V2 = violin 2 = counter-melody
 
-B = bass = bass
+B = bass
 
 SE = sound effect
